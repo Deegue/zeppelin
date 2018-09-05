@@ -17,9 +17,19 @@
 
 package org.apache.zeppelin.notebook;
 
+import java.util.Map;
+
 /**
- * TODO(moon): provide description.
+ * This class is used for broadcast Paragrapah to frontend.
+ * runtimeInfos will also been prapagated to frontend.
  */
-public interface JobListenerFactory {
-  public ParagraphJobListener getParagraphJobListener(Note note);
+public class ParagraphWithRuntimeInfo extends Paragraph {
+
+  private Map<String, ParagraphRuntimeInfo> runtimeInfos;
+
+  public ParagraphWithRuntimeInfo(Paragraph p) {
+    super(p);
+    this.runtimeInfos = p.getRuntimeInfos();
+  }
+
 }

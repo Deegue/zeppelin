@@ -18,6 +18,7 @@
 package org.apache.zeppelin.rest;
 
 import com.google.common.collect.Maps;
+import javax.inject.Inject;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.zeppelin.annotation.ZeppelinApi;
 import org.apache.zeppelin.dep.Repository;
@@ -68,6 +69,7 @@ public class InterpreterRestApi {
   private final InterpreterSettingManager interpreterSettingManager;
   private final NotebookServer notebookServer;
 
+  @Inject
   public InterpreterRestApi(
       InterpreterService interpreterService,
       InterpreterSettingManager interpreterSettingManager,
@@ -195,7 +197,6 @@ public class InterpreterRestApi {
       } else {
         interpreterSettingManager.restart(settingId, noteId, SecurityUtils.getPrincipal());
       }
-      notebookServer.clearParagraphRuntimeInfo(setting);
 
     } catch (InterpreterException e) {
       logger.error("Exception in InterpreterRestApi while restartSetting ", e);
@@ -213,7 +214,7 @@ public class InterpreterRestApi {
    */
   @GET
   @ZeppelinApi
-  public Response listInterpreter(String message) {
+  public Response listInterpreter() {
     Map<String, InterpreterSetting> m = interpreterSettingManager.getInterpreterSettingTemplates();
     return new JsonResponse<>(Status.OK, "", m).build();
   }

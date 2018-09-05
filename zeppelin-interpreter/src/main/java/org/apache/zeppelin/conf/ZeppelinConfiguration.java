@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
@@ -569,6 +571,10 @@ public class ZeppelinConfiguration extends XMLConfiguration {
     return getInt(ConfVars.ZEPPELIN_SERVER_JETTY_REQUEST_HEADER_SIZE);
   }
 
+  public Boolean isAuthorizationHeaderClear() {
+    return getBoolean(ConfVars.ZEPPELIN_SERVER_AUTHORIZATION_HEADER_CLEAR);
+  }
+
 
   public String getXFrameOptions() {
     return getString(ConfVars.ZEPPELIN_SERVER_XFRAME_OPTIONS);
@@ -634,43 +640,35 @@ public class ZeppelinConfiguration extends XMLConfiguration {
     return getRelativeDir(ConfVars.ZEPPELIN_SEARCH_TEMP_PATH);
   }
 
-  public Map<String, String> dumpConfigurations(ZeppelinConfiguration conf,
-                                                ConfigurationKeyPredicate predicate) {
-    Map<String, String> configurations = new HashMap<>();
+  public Map<String, String> dumpConfigurations(Predicate<String> predicate) {
+    Map<String, String> properties = new HashMap<>();
 
     for (ConfVars v : ConfVars.values()) {
       String key = v.getVarName();
 
-      if (!predicate.apply(key)) {
+      if (!predicate.test(key)) {
         continue;
       }
 
       ConfVars.VarType type = v.getType();
       Object value = null;
       if (type == ConfVars.VarType.BOOLEAN) {
-        value = conf.getBoolean(v);
+        value = getBoolean(v);
       } else if (type == ConfVars.VarType.LONG) {
-        value = conf.getLong(v);
+        value = getLong(v);
       } else if (type == ConfVars.VarType.INT) {
-        value = conf.getInt(v);
+        value = getInt(v);
       } else if (type == ConfVars.VarType.FLOAT) {
-        value = conf.getFloat(v);
+        value = getFloat(v);
       } else if (type == ConfVars.VarType.STRING) {
-        value = conf.getString(v);
+        value = getString(v);
       }
 
       if (value != null) {
-        configurations.put(key, value.toString());
+        properties.put(key, value.toString());
       }
     }
-    return configurations;
-  }
-
-  /**
-   * Predication whether key/value pair should be included or not
-   */
-  public interface ConfigurationKeyPredicate {
-    boolean apply(String key);
+    return properties;
   }
 
   /**
@@ -765,6 +763,7 @@ public class ZeppelinConfiguration extends XMLConfiguration {
     ZEPPELIN_SERVER_XFRAME_OPTIONS("zeppelin.server.xframe.options", "SAMEORIGIN"),
     ZEPPELIN_SERVER_JETTY_NAME("zeppelin.server.jetty.name", null),
     ZEPPELIN_SERVER_JETTY_REQUEST_HEADER_SIZE("zeppelin.server.jetty.request.header.size", 8192),
+    ZEPPELIN_SERVER_AUTHORIZATION_HEADER_CLEAR("zeppelin.server.authorization.header.clear", true),
     ZEPPELIN_SERVER_STRICT_TRANSPORT("zeppelin.server.strict.transport", "max-age=631138519"),
     ZEPPELIN_SERVER_X_XSS_PROTECTION("zeppelin.server.xxss.protection", "1"),
 
